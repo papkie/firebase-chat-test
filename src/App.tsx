@@ -1,26 +1,56 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Container from "@mui/material/Container";
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import React, { useState } from "react";
+import { IntlProvider } from "react-intl";
+import { config } from "./config/app";
+import { firebaseLoginListener, getLoggedUser } from "./utils/auth";
+import {
+  getCurrentLocale,
+  getTranslationsForCurrentLanguage,
+} from "./utils/translations";
+import { Chat } from "./views/chat";
+import { LoginPage } from "./views/login";
 
-function App() {
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    background: {
+      default: "#222",
+      paper: "#000",
+    },
+  },
+  components: {
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          color: "#fff",
+          "&.Mui-selected": {
+            color: "#fff",
+          },
+        },
+      },
+    },
+  },
+});
+
+const App = () => {
+  const [user, setUser] = useState(getLoggedUser());
+  firebaseLoginListener(setUser);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <IntlProvider
+      messages={getTranslationsForCurrentLanguage()}
+      defaultLocale={config.defaultLocale}
+      locale={getCurrentLocale()}
+    >
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Container fixed disableGutters>
+          {user ? <Chat /> : <LoginPage />}
+        </Container>
+      </ThemeProvider>
+    </IntlProvider>
   );
-}
+};
 
 export default App;
